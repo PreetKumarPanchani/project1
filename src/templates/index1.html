@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL AI Query Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container-fluid my-3">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h3>SQL AI Assistant</h3>
+                        <div>
+                            <span id="status-indicator" class="badge bg-secondary">Initializing...</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="chat-container" class="mb-3">
+                            <div class="chat-messages" id="messages">
+                                <div class="message system">
+                                    <div class="message-content">
+                                        AI Assistant Ready ...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sql-container mt-4" id="sql-container" style="display: none;">
+                            <h5>Query:</h5>
+                            <pre id="sql-query" class="bg-light p-3 rounded"></pre>
+                        </div>
+                        
+                        <div class="sql-results mt-4" id="sql-results" style="display: none;">
+                            <!-- SQL results will be displayed here -->
+                        </div>
+                        
+                        <div class="input-group mt-3">
+                            <input type="text" id="text-input" class="form-control" placeholder="Type your query here...">
+                            <button class="btn btn-primary" id="send-button">Send</button>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button id="listen-button" class="btn btn-success">
+                                    <i class="bi bi-mic"></i> Start Listening
+                                </button>
+                                <span id="recording-indicator" class="ms-2 text-danger" style="display: none;">
+                                    <i class="bi bi-record-circle"></i> Recording...
+                                </span>
+                            </div>
+                            <div>
+                                <!--<button id="toggle-mute" class="btn btn-outline-secondary me-2">
+                                    <i class="bi bi-volume-up"></i> Mute Assistant
+                                </button>-->
+                                <button id="interrupt-button" class="btn btn-danger" disabled>
+                                    <i class="bi bi-x-circle"></i> Interrupt Assistant
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-3 shadow">
+                    <div class="card-header bg-info text-white">
+                        <h5>Example Queries</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item example-query">Show all customers</li>
+                            <li class="list-group-item example-query">Show orders by status</li>
+                            <li class="list-group-item example-query">Show popular product</li>
+                            <li class="list-group-item example-query">Count customers</li>
+                            <li class="list-group-item example-query">Show recent orders</li>
+                            <li class="list-group-item example-query">Status of Order 40</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hidden audio element for playback -->
+    <audio id="audio-player" style="display: none;"></audio>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

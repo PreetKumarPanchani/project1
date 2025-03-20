@@ -1,0 +1,386 @@
+:root {
+  /* Main color palette inspired by Monokai Pro */
+  --bg-primary: #2d2a2e;
+  --bg-secondary: #403e41;
+  --bg-light: #f0f0f0;
+  --text-dark: #1d1d1d;
+  --text-primary: #fcfcfa;
+  --text-secondary: #939293;
+  --accent-primary: #ff6188;
+  --accent-secondary: #78dce8;
+  --accent-tertiary: #a9dc76;
+  --user-msg-bg: #403e41;
+  --assistant-msg-bg: #35333a;
+  --system-msg-bg: #221f22;
+  --border-color: #5b595c;
+  --sql-keyword: #ff6188;
+  --sql-function: #78dce8;
+  --sql-string: #a9dc76;
+  --sql-number: #ab9df2;
+  --table-header-bg: #35333a;
+  --table-row-alt: #2d2a2e;
+  --shadow: rgba(0, 0, 0, 0.2);
+}
+
+body {
+  background-color: var(--bg-light);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.card {
+  background-color: var(--bg-primary);
+  border: none;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.card-header {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.chat-messages {
+  height: 400px;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+}
+
+.message {
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  max-width: 80%;
+  clear: both;
+  box-shadow: 0 2px 5px var(--shadow);
+  color: var(--text-primary);
+}
+
+.message.system {
+  background-color: var(--system-msg-bg);
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  max-width: 90%;
+  border-left: 3px solid var(--accent-secondary);
+}
+
+.message.user {
+  background-color: var(--user-msg-bg);
+  float: right;
+  border-right: 3px solid var(--accent-tertiary);
+}
+
+.message.assistant {
+  background-color: var(--assistant-msg-bg);
+  float: left;
+  border-left: 3px solid var(--accent-primary);
+}
+
+.message-content {
+  word-wrap: break-word;
+}
+
+/* Input and buttons styling */
+.input-group .form-control {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 10px 15px;
+}
+
+.input-group .form-control::placeholder {
+  color: var(--text-secondary);
+}
+
+.input-group .form-control:focus {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--accent-secondary);
+  box-shadow: 0 0 0 0.25rem rgba(120, 220, 232, 0.25);
+}
+
+.btn-primary {
+  background-color: var(--accent-secondary);
+  border-color: var(--accent-secondary);
+  color: var(--bg-primary);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #5ecfdf;
+  border-color: #5ecfdf;
+  color: var(--bg-primary);
+}
+
+.btn-success {
+  background-color: var(--accent-tertiary);
+  border-color: var(--accent-tertiary);
+  color: var(--bg-primary);
+}
+
+.btn-success:hover, .btn-success:focus {
+  background-color: #9acf66;
+  border-color: #9acf66;
+  color: var(--bg-primary);
+}
+
+/* Example queries styling */
+.example-query {
+  cursor: pointer;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.example-query:hover {
+  background-color: var(--bg-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--shadow);
+  border-left: 3px solid var(--accent-secondary);
+}
+
+/* SQL query display */
+.sql-container {
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: 20px;
+  border: 1px solid var(--border-color);
+}
+
+#sql-query {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 15px;
+  border-radius: 5px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  line-height: 1.5;
+  font-size: 0.95rem;
+  position: relative;
+  overflow-x: auto;
+}
+
+/* SQL syntax highlighting */
+#sql-query .keyword {
+  color: var(--sql-keyword);
+  font-weight: bold;
+}
+
+#sql-query .function {
+  color: var(--sql-function);
+}
+
+#sql-query .string {
+  color: var(--sql-string);
+}
+
+#sql-query .number {
+  color: var(--sql-number);
+}
+
+/* Table styling */
+.table-responsive-container {
+  max-height: 400px;
+  max-width: 100%;
+  overflow: auto;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  position: relative;
+  background-color: var(--bg-secondary);
+}
+
+.table {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  margin-bottom: 0;
+}
+
+.table-striped>tbody>tr:nth-of-type(odd) {
+  background-color: var(--bg-secondary);
+}
+
+.table-striped>tbody>tr:nth-of-type(even) {
+  background-color: var(--table-row-alt);
+}
+
+.table-responsive-container table thead th {
+  position: sticky;
+  top: 0;
+  background-color: var(--table-header-bg);
+  z-index: 10;
+  border-bottom: 2px solid var(--accent-primary);
+  padding: 12px 8px;
+  font-weight: 600;
+}
+
+.table>:not(caption)>*>* {
+  padding: 10px 8px;
+  border-bottom-width: 1px;
+  border-bottom-color: var(--border-color);
+}
+
+/* Recording indicator animation */
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+#recording-indicator {
+  animation: pulse 1.5s infinite;
+  color: var(--accent-primary);
+}
+
+/* Status indicator styles */
+#status-indicator {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+/* Interrupt button styling */
+#interrupt-button {
+  background-color: var(--accent-primary);
+  color: var(--bg-primary);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+#interrupt-button:hover {
+  background-color: #ff4d73;
+  transform: translateY(-2px);
+}
+
+#interrupt-button:disabled {
+  background-color: var(--text-secondary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Connection status animations */
+@keyframes fadeInOut {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+.reconnecting {
+  animation: fadeInOut 1.5s infinite;
+}
+
+/* Improved responsive styles for mobile */
+@media (max-width: 768px) {
+  .table-responsive-container {
+    max-height: 300px;
+  }
+  
+  table {
+    font-size: 0.9rem;
+  }
+  
+  .message {
+    max-width: 90%;
+  }
+  
+  .card-footer .d-flex {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .card-footer .d-flex > div {
+    width: 100%;
+  }
+}
+
+/* Override Bootstrap's default header background */
+.card-header.bg-primary {
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 2px solid var(--accent-primary);
+}
+
+/* Make the assistant title stand out more */
+.card-header h3 {
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Fix table text visibility and styling */
+.table-responsive-container {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.table {
+  color: var(--text-primary);
+}
+
+.table tbody tr {
+  color: var(--text-primary);
+}
+
+.table td {
+  color: var(--text-primary);
+  border-color: rgba(91, 89, 92, 0.5);
+}
+
+/* Add hover effect to rows for better UX */
+.table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Adjust button styles to match theme */
+#send-button {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--bg-primary);
+  font-weight: 500;
+}
+
+#send-button:hover, #send-button:focus {
+  background-color: #ff4d73;
+  border-color: #ff4d73;
+  box-shadow: 0 0 0 0.25rem rgba(255, 97, 136, 0.25);
+}
+
+.btn-success, #listen-button {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--bg-primary);
+  font-weight: 500;
+}
+
+.btn-success:hover, .btn-success:focus, 
+#listen-button:hover, #listen-button:focus {
+  background-color: #ff4d73;
+  border-color: #ff4d73;
+  box-shadow: 0 0 0 0.25rem rgba(120, 220, 232, 0.25);
+}
+
+/* Style the badge for better visibility */
+#status-indicator {
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-radius: 50px;
+  letter-spacing: 0.5px;
+}
+
+/* Refinements for SQL results section */
+#sql-results h5 {
+  color: var(--accent-secondary);
+  font-weight: 600;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+/* Enhanced focus styles for accessibility */
+:focus {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}

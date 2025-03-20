@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+nl_to_db/
+
+# Dependency files
+*.lock
+requirements.lock
+requirements-dev.lock
+
+# Environment variables
+.env
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and databases
+*.log
+
+# Compiled files
+*.compiled
+*.min.js
+*.min.css
+
+# Temporary files
+*.tmp
+*.bak
+
+# Permissions-related
+*.orig
