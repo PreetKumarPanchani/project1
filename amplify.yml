@@ -1,0 +1,31 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd frontend
+        - npm ci
+    build:
+      commands:
+        # Set environment variables - note API_URL includes protocol but WS_HOST doesn't
+        - echo "NEXT_PUBLIC_API_URL=https://e39gefrnpq.eu-west-2.awsapprunner.com" > .env.local
+        - echo "NEXT_PUBLIC_WS_HOST=e39gefrnpq.eu-west-2.awsapprunner.com" >> .env.local
+        - echo "NEXT_PUBLIC_API_URL=https://e39gefrnpq.eu-west-2.awsapprunner.com" >> .env.production
+        - echo "NEXT_PUBLIC_WS_HOST=e39gefrnpq.eu-west-2.awsapprunner.com" >> .env.production
+        - npm run build
+  artifacts:
+    baseDirectory: frontend/out
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - frontend/node_modules/**/*
+  customHeaders:
+    - pattern: '**/*.html'
+      headers:
+        - key: 'Cache-Control'
+          value: 'public, max-age=0, must-revalidate'
+    - pattern: 'static/**/*'
+      headers:
+        - key: 'Cache-Control'
+          value: 'public, max-age=31536000, immutable'

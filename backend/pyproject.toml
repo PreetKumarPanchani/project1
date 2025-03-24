@@ -1,0 +1,101 @@
+[project]
+name = "nl-to-db-query"
+version = "0.1.0"
+description = "Natural Language to Database Query System"
+authors = [
+    { name = "Preet", email = "preetpanchani1@gmail.com" }
+]
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">= 3.10"
+
+dependencies = [
+    # Core dependencies
+    "fastapi==0.103.1",
+    "uvicorn>=0.24.0",
+    "pydantic>=2.5.2",
+    "jinja2>=3.1.2",
+    "websockets>=11.0.3",
+
+    # Database support
+    "psycopg2-binary>=2.9.9",
+    "requests_toolbelt",
+    
+    # NLP and ML
+    "sentence-transformers>=2.2.2",
+    "numpy>=1.24.0",
+    
+    # Speech Text Speech Processing
+    "faster-whisper>=1.0.2",
+    "openai>=1.30.1",
+    "PyAudio>=0.2.14",
+    "SpeechRecognition",
+    "pyttsx3>=2.90",
+    "tabulate",
+    "groq",
+    
+    # Data processing
+    "pandas>=2.1.3",
+    
+    # Utilities
+    "python-dotenv>=1.0.0",
+    "python-multipart>=0.0.6",
+    "aiohttp>=3.9.1",
+    "requests>=2.31.0",
+    
+    # Not required packages for now
+    #"python-socketio>=5.3.0",
+    #"python-engineio>=4.3.0",
+    #"scikit-learn>=1.3.2",
+    #"chainlit",
+    #"numba>=0.54.0",
+    #"librosa",
+    #"python-dotenv",
+
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.1",
+    "pytest-mock>=3.12.0",
+    "hypothesis>=6.92.1",
+    
+    
+    # Linting and formatting
+    "black>=23.11.0",
+    "isort>=5.12.0",
+    "mypy>=1.7.1",
+    "ruff>=0.1.6",
+    "pylint>=3.0.2",
+
+    
+    # Development tools
+    "jupyter>=1.0.0",
+    "ipython>=8.17.2",
+    
+    # Documentation
+    "mkdocs>=1.5.3",
+    "mkdocs-material>=9.4.14",
+    "mkdocstrings>=0.24.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+# Add system dependencies information
+#[tool.hatch.metadata.hooks.system-deps]
+
+

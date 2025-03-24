@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFDE59" />
+      <stop offset="100%" stop-color="#FFB830" />
+    </linearGradient>
+  </defs>
+  <!-- Center hexagon -->
+  <polygon 
+    points="100,60 130,80 130,120 100,140 70,120 70,80" 
+    fill="url(#logo-gradient)" 
+    stroke="#FFC007" 
+    stroke-width="2" 
+  />
+  <!-- Outer hexagons -->
+  <polygon 
+    points="100,20 130,40 130,80 100,100 70,80 70,40" 
+    fill="none" 
+    stroke="#FFDE59" 
+    stroke-width="2" 
+    stroke-opacity="0.8"
+  />
+  <polygon 
+    points="160,60 190,80 190,120 160,140 130,120 130,80" 
+    fill="none" 
+    stroke="#FFDE59" 
+    stroke-width="2" 
+    stroke-opacity="0.8"
+  />
+  <polygon 
+    points="100,100 130,120 130,160 100,180 70,160 70,120" 
+    fill="none" 
+    stroke="#FFDE59" 
+    stroke-width="2" 
+    stroke-opacity="0.8"
+  />
+  <polygon 
+    points="40,60 70,80 70,120 40,140 10,120 10,80" 
+    fill="none" 
+    stroke="#FFDE59" 
+    stroke-width="2" 
+    stroke-opacity="0.8"
+  />
+  <!-- Add a soft glow effect -->
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+    <feGaussianBlur stdDeviation="5" result="blur" />
+    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+  </filter>
+  <!-- Apply the glow to a copy of the center hexagon -->
+  <polygon 
+    points="100,60 130,80 130,120 100,140 70,120 70,80" 
+    fill="#FFDE59" 
+    opacity="0.5" 
+    filter="url(#glow)" 
+  />
+</svg>
