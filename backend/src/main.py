@@ -14,11 +14,13 @@ from pathlib import Path
 from datetime import datetime
 import sys
 
+
 # Add the parent directory to path if running directly with Python
 if __name__ == "__main__":
     sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# Now import modules using the correct path
+
+from src.gateway.api_gateway_handler import router as gateway_router
 from src.websocket.connection import ConnectionManager
 from src.voice.assistant import VoiceAssistant
 from src.utils.logger import setup_logger
@@ -40,12 +42,19 @@ FRONTEND_CHOICE = os.environ.get("FRONTEND_CHOICE", args.frontend)
 # Initialize FastAPI app
 app = FastAPI(title="DB Assistant")
 
+# After initializing the FastAPI app
+app.include_router(gateway_router)
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:8001", 
                    "https://e39gefrnpq.eu-west-2.awsapprunner.com",
-                   "https://main.d91ttu5yaqgxt.amplifyapp.com"
+                   "https://main.d91ttu5yaqgxt.amplifyapp.com",
+                   "https://5nu02h2v13.execute-api.eu-west-2.amazonaws.com/production/",
+                   "https://5nu02h2v13.execute-api.eu-west-2.amazonaws.com",
+                   "https://5nu02h2v13.execute-api.eu-west-2.amazonaws.com/production",
+
                    ],  # Adjust in production
     allow_credentials=True,
     allow_methods=["*"],

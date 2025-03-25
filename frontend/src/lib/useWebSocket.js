@@ -16,8 +16,26 @@ export function useWebSocket() {
   const connect = useCallback(() => {
     // Generate a unique client ID
     const clientId = 'client-' + Math.random().toString(36).substring(2, 9);
-      
 
+    // Get the WebSocket URL from environment variables
+    const apiGateway = process.env.NEXT_PUBLIC_WS_GATEWAY || '';
+
+    if (!apiGateway) {
+      console.error('WebSocket Gateway URL not configured');
+      setStatus('Configuration error');
+      return;
+    }
+  
+
+
+    // Construct the WebSocket URL with client ID as a query parameter
+    const wsUrl = `${apiGateway}?client_id=${clientId}`;
+    
+    console.log("Connecting to WebSocket URL:", wsUrl);
+
+
+    /*
+    
     // Extract just the hostname from environment variables
     const getHostFromUrl = (urlString) => {
       if (!urlString) return '';
@@ -51,6 +69,10 @@ export function useWebSocket() {
     console.log("Clean hostname:", apiHost);
     console.log("Connecting to WebSocket URL:", wsUrl);
     
+    */ 
+
+    
+    
 
     // IMPORTANT: Connect directly to the backend WebSocket server, bypassing Next.js
     // This is critical for WebSockets to work properly
@@ -58,13 +80,17 @@ export function useWebSocket() {
     //  `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//localhost:8001/ws/${clientId}` : 
     //  '';
     
+
+    
     // Close existing socket if open
     if (socketRef.current && 
         (socketRef.current.readyState === WebSocket.OPEN || 
          socketRef.current.readyState === WebSocket.CONNECTING)) {
       socketRef.current.close();
-    }
+  }
     
+
+  
     if (!wsUrl) return; // Don't attempt to connect if URL is empty
     
     try {
