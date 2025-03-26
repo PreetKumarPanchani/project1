@@ -20,6 +20,10 @@ from src.database.db_executor_aws import AWSPostgresExecutor
 from src.config.config_manager import ConfigManager
 from src.utils.logger import setup_logger
 
+import boto3
+import json
+
+
 # Setup logging
 logger = setup_logger(name="voice_assistant", level="INFO")
 
@@ -71,10 +75,11 @@ class VoiceAssistant:
     async def start(self):
         """Start the voice assistant"""
         logger.info("Starting voice assistant")
-        await self.connection_manager.send_personal_message(
-            {"type": "status", "text": "Assistant ready"}, 
-            self.websocket
-        )
+        #await self.connection_manager.send_personal_message(
+        #    {"type": "status", "text": "Assistant ready"}, 
+        #    self.websocket
+        #)
+        await self.send_message_to_client({"type": "status", "text": "Assistant ready"})
         return True
 
     async def process_audio_data(self, audio_data: bytes):
@@ -113,10 +118,11 @@ class VoiceAssistant:
             logger.info(f"Transcribed: {text}")
             
             # Send transcription to client
-            await self.connection_manager.send_personal_message(
-                {"type": "transcription", "text": text},
-                self.websocket
-            )
+            ##await self.connection_manager.send_personal_message(
+            ##    {"type": "transcription", "text": text},
+            ##    self.websocket
+            ##)
+            await self.send_message_to_client({"type": "transcription", "text": text})
             
             # Check for interruption first
             if self.is_speaking:
@@ -124,10 +130,11 @@ class VoiceAssistant:
                 self.is_interrupted = True
                 
                 # Send interruption status to client
-                await self.connection_manager.send_personal_message(
-                    {"type": "status", "text": "Speech interrupted"},
-                    self.websocket
-                )
+                ##await self.connection_manager.send_personal_message(
+                ##    {"type": "status", "text": "Speech interrupted"},
+                ##    self.websocket
+                ##)
+                await self.send_message_to_client({"type": "status", "text": "Speech interrupted"})
                 
                 # Give a moment for speech to stop
                 await asyncio.sleep(0.2)
@@ -145,10 +152,11 @@ class VoiceAssistant:
             
         except Exception as e:
             logger.error(f"Error processing audio: {e}")
-            await self.connection_manager.send_personal_message(
-                {"type": "error", "text": f"Audio processing error: {str(e)}"},
-                self.websocket
-            )
+            ##await self.connection_manager.send_personal_message(
+            ##    {"type": "error", "text": f"Audio processing error: {str(e)}"},
+            ##    self.websocket
+            ##)
+            await self.send_message_to_client({"type": "error", "text": f"Audio processing error: {str(e)}"})
 
     async def _process_transcription(self, text: str):
         """Process transcribed text with wake word detection"""
@@ -159,10 +167,11 @@ class VoiceAssistant:
         """
         if self.is_activated and any(word in text for word in ["stop", "exit", "quit"]):
             self.is_activated = False
-            await self.connection_manager.send_personal_message(
-                {"type": "status", "text": "Assistant deactivated. Say 'Agent' to wake me up again."},
-                self.websocket
-            )
+            ##await self.connection_manager.send_personal_message(
+            ##    {"type": "status", "text": "Assistant deactivated. Say 'Agent' to wake me up again."},
+            ##    self.websocket
+            ##)
+            await self.send_message_to_client({"type": "status", "text": "Assistant deactivated. Say 'Agent' to wake me up again."})
             await self.speak("Assistant deactivated. Say 'Agent' to wake me up again.")
             return
         """
@@ -172,10 +181,11 @@ class VoiceAssistant:
         """
         if not self.is_activated and self.wake_word.lower() in text:
             self.is_activated = True
-            await self.connection_manager.send_personal_message(
-                {"type": "status", "text": "Assistant activated! Ready for query."},
-                self.websocket
-            )
+            ##await self.connection_manager.send_personal_message(
+            ##    {"type": "status", "text": "Assistant activated! Ready for query."},
+            ##    self.websocket
+            ##)
+            await self.send_message_to_client({"type": "status", "text": "Assistant activated! Ready for query."})
             
             # Extract any query that came after the wake word
             query = text.split(self.wake_word.lower(), 1)[-1].strip()
@@ -204,11 +214,12 @@ class VoiceAssistant:
         # If not activated and not the wake word, activate first
         if not self.is_activated and self.wake_word.lower() not in query.lower():
             self.is_activated = True
-            await self.connection_manager.send_personal_message(
-                {"type": "status", "text": "Assistant activated! Processing your query..."},
-                self.websocket
-            )
-            
+            ##await self.connection_manager.send_personal_message(
+            ##    {"type": "status", "text": "Assistant activated! Processing your query..."},
+            ##    self.websocket
+            ##)
+            await self.send_message_to_client({"type": "status", "text": "Assistant activated! Processing your query..."})
+        
         # If it contains the wake word, extract the actual query
         if self.wake_word.lower() in query.lower():
             query = query.split(self.wake_word.lower(), 1)[-1].strip()
@@ -237,10 +248,11 @@ class VoiceAssistant:
             
             if sql_query:
                 logger.info(f"Executing SQL: {sql_query}")
-                await self.connection_manager.send_personal_message(
-                    {"type": "sql", "query": sql_query},
-                    self.websocket
-                )
+                ##await self.connection_manager.send_personal_message(
+                ##    {"type": "sql", "query": sql_query},
+                ##    self.websocket
+                ##)
+                await self.send_message_to_client({"type": "sql", "query": sql_query})
                 
                 # Execute query with parameters
                 try:
@@ -251,10 +263,11 @@ class VoiceAssistant:
                         
                     if results:
                         # Send results to client
-                        await self.connection_manager.send_personal_message(
-                            {"type": "results", "data": results},
-                            self.websocket
-                        )
+                        ##await self.connection_manager.send_personal_message(
+                        ##    {"type": "results", "data": results},
+                        ##    self.websocket
+                        ##)
+                        await self.send_message_to_client({"type": "results", "data": results})
                         
                         # Generate natural language response
                         response = await self.generate_response(query, results)
@@ -264,20 +277,23 @@ class VoiceAssistant:
                         
                 except Exception as e:
                     logger.error(f"Database error: {e}")
-                    await self.connection_manager.send_personal_message(
-                        {"type": "error", "text": f"Database error: {str(e)}"},
-                        self.websocket
-                    )
+                    ##await self.connection_manager.send_personal_message(
+                    ##    {"type": "error", "text": f"Database error: {str(e)}"},
+                    ##    self.websocket
+                    ##)
+                    await self.send_message_to_client({"type": "error", "text": f"Database error: {str(e)}"})
                     await self.speak(f"I encountered a database error: {str(e)}")
             else:
                 await self._handle_non_sql_query(query)
 
         except Exception as e:
             logger.error(f"Query handling error: {str(e)}")
-            await self.connection_manager.send_personal_message(
-                {"type": "error", "text": f"Query error: {str(e)}"},
-                self.websocket
-            )
+            ##await self.connection_manager.send_personal_message(
+            ##    {"type": "error", "text": f"Query error: {str(e)}"},
+            ##    self.websocket
+            ##)
+
+            await self.send_message_to_client({"type": "error", "text": f"Query error: {str(e)}"})
             await self.speak("I encountered an error processing your request. Please try again.")
 
 
@@ -290,10 +306,12 @@ class VoiceAssistant:
         logger.info(f"Speaking: {text}")
             
         # Always send text response to browser regardless of mute state
-        await self.connection_manager.send_personal_message(
-            {"type": "response", "text": text},
-            self.websocket
-        )
+        ##await self.connection_manager.send_personal_message(
+        ##    {"type": "response", "text": text},
+        ##    self.websocket
+        ##)
+        await self.send_message_to_client({"type": "response", "text": text})
+
         
         # Reset interruption flag before starting speech
         self.is_interrupted = False
@@ -308,10 +326,12 @@ class VoiceAssistant:
             self.is_speaking = True
             
             # Send signal that streaming is starting
-            await self.connection_manager.send_personal_message(
-                {"type": "audio_stream_start", "format": "pcm", "sampleRate": 24000},
-                self.websocket
-            )
+            ##await self.connection_manager.send_personal_message(
+            ##    {"type": "audio_stream_start", "format": "pcm", "sampleRate": 24000},
+            ##    self.websocket
+            ##)
+
+            await self.send_message_to_client({"type": "audio_stream_start", "format": "pcm", "sampleRate": 24000})
             
             # Use streaming response with PCM format for lowest latency
             async with self.openai_client.audio.speech.with_streaming_response.create(
@@ -330,20 +350,22 @@ class VoiceAssistant:
                     if chunk:
                         # Send PCM chunk to the client
                         chunk_base64 = base64.b64encode(chunk).decode('utf-8')
-                        await self.connection_manager.send_personal_message(
-                            {"type": "audio_chunk", "data": chunk_base64, "format": "pcm"},
-                            self.websocket
-                        )
+                        ##await self.connection_manager.send_personal_message(
+                        ##    {"type": "audio_chunk", "data": chunk_base64, "format": "pcm"},
+                        ##    self.websocket
+                        ##)
+                        await self.send_message_to_client({"type": "audio_chunk", "data": chunk_base64, "format": "pcm"})
                         
                 
                 # No need for fallback with PCM as it's being played in real-time
                     
         except Exception as e:
             logger.error(f"TTS error: {e}")
-            await self.connection_manager.send_personal_message(
-                {"type": "error", "text": f"Speech generation error: {str(e)}"},
-                self.websocket
-            )
+            ##await self.connection_manager.send_personal_message(
+            ##    {"type": "error", "text": f"Speech generation error: {str(e)}"},
+            ##    self.websocket
+            ##)
+            await self.send_message_to_client({"type": "error", "text": f"Speech generation error: {str(e)}"})
         finally:
             # Always mark as not speaking when done
             self.is_speaking = False
@@ -352,10 +374,11 @@ class VoiceAssistant:
 
             
             # Signal end of stream
-            await self.connection_manager.send_personal_message(
-                {"type": "audio_stream_end"},
-                self.websocket
-            )
+            ##await self.connection_manager.send_personal_message(
+            ##    {"type": "audio_stream_end"},
+            ##    self.websocket
+            ##)
+            await self.send_message_to_client({"type": "audio_stream_end"})
 
     async def generate_response(self, query: str, results: List[Dict[str, Any]]) -> str:
         """Generate natural language response using Groq"""
@@ -428,7 +451,57 @@ class VoiceAssistant:
             pass
             
         logger.info("Voice assistant stopped")
-        await self.connection_manager.send_personal_message(
-            {"type": "status", "text": "Assistant stopped"},
-            self.websocket
-        )
+        ##await self.connection_manager.send_personal_message(
+        ##    {"type": "status", "text": "Assistant stopped"},
+        ##    self.websocket
+        ##)
+        await self.send_message_to_client({"type": "status", "text": "Assistant stopped"})
+    
+
+    async def send_message_to_client(self, message):
+        """Send message to client using Lambda"""
+        try:
+            # Extract client ID from the WebSocket
+            client_id = None
+            
+            # Try to get from WebSocket scope path
+            if hasattr(self.websocket, "scope") and "path" in self.websocket.scope:
+                path = self.websocket.scope["path"]
+                if path.startswith("/ws/"):
+                    client_id = path.split("/ws/")[1]
+            
+            if not client_id:
+                logger.error("No client_id found for WebSocket")
+                return False
+            
+            # Initialize Lambda client
+            lambda_client = boto3.client('lambda', region_name='eu-west-2')
+            
+            # Prepare payload for Lambda
+            payload = {
+                'clientId': client_id,
+                'message': message
+            }
+            
+            # Invoke Lambda function
+            response = lambda_client.invoke(
+                FunctionName='websocket-send-message',
+                InvocationType='RequestResponse',
+                Payload=json.dumps(payload)
+            )
+            
+            # Process response
+            result = json.loads(response['Payload'].read().decode())
+            if result.get('statusCode') == 200:
+                return True
+            else:
+                logger.error(f"Error from Lambda: {result}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error sending message via Lambda: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return False
+        
+        

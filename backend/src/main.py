@@ -21,6 +21,8 @@ if __name__ == "__main__":
 
 
 from src.gateway.api_gateway_handler import router as gateway_router
+from src.gateway.lambda_message_processor import router as lambda_router
+
 from src.websocket.connection import ConnectionManager
 from src.voice.assistant import VoiceAssistant
 from src.utils.logger import setup_logger
@@ -43,7 +45,9 @@ FRONTEND_CHOICE = os.environ.get("FRONTEND_CHOICE", args.frontend)
 app = FastAPI(title="DB Assistant")
 
 # After initializing the FastAPI app
-app.include_router(gateway_router)
+app.include_router(gateway_router)    
+app.include_router(lambda_router)     
+
 
 # Add CORS middleware
 app.add_middleware(
@@ -103,10 +107,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         await voice_assistant.start()
         
         # Send ready message
-        await connection_manager.send_personal_message(
-            {"type": "status", "text": "Assistant ready. Say 'Agent' to activate."}, 
-            websocket
-        )
+        ## await connection_manager.send_personal_message(
+        ##    {"type": "status", "text": "Assistant ready. Say 'Agent' to activate."}, 
+        ##    websocket
+        ##)
+        await voice_assistant.send_message_to_client({"type": "status", "text": "Assistant ready. Say 'Agent' to activate."})
+
         
         # Listen for commands from the client
         while True:
@@ -136,27 +142,31 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                     
             elif command == "toggle_listen":
                 is_listening = data.get("listening", False)
-                await connection_manager.send_personal_message(
-                    {"type": "status", "text": f"{'Listening' if is_listening else 'Stopped listening'}"}, 
-                    websocket
-                )
+                ##await connection_manager.send_personal_message(
+                ##    {"type": "status", "text": f"{'Listening' if is_listening else 'Stopped listening'}"}, 
+                ##    websocket
+                ##)
+                await voice_assistant.send_message_to_client({"type": "status", "text": f"{'Listening' if is_listening else 'Stopped listening'}"})
+
                 
             elif command == "toggle_mute":
                 is_muted = data.get("muted", False)
                 voice_assistant.is_muted = is_muted
-                await connection_manager.send_personal_message(
-                    {"type": "status", "text": f"{'Assistant muted' if is_muted else 'Assistant unmuted'}"}, 
-                    websocket
-                )
+                ##await connection_manager.send_personal_message(
+                ##    {"type": "status", "text": f"{'Assistant muted' if is_muted else 'Assistant unmuted'}"}, 
+                ##    websocket
+                ##)
+                await voice_assistant.send_message_to_client({"type": "status", "text": f"{'Assistant muted' if is_muted else 'Assistant unmuted'}"})
                 
             elif command == "interrupt_speech":
                 # New command to handle interruption from client
                 logger.info(f"Client {client_id} requested speech interruption")
                 voice_assistant.is_interrupted = True
-                await connection_manager.send_personal_message(
-                    {"type": "status", "text": "Speech interrupted"}, 
-                    websocket
-                )
+                ## await connection_manager.send_personal_message(
+                ##    {"type": "status", "text": "Speech interrupted"}, 
+                ##    websocket
+                ##)
+                await voice_assistant.send_message_to_client({"type": "status", "text": "Speech interrupted"})
                 
     except WebSocketDisconnect:
         logger.info(f"Client {client_id} disconnected")
