@@ -5,6 +5,8 @@ import asyncio
 from typing import Dict, Any
 import boto3
 import os
+import time
+
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/ws-gateway")
@@ -84,7 +86,13 @@ async def handle_disconnect(request: Request):
         connection_id = body.get("connectionId")
         
         if not connection_id:
-            return Response(status_code=400, content="Missing connectionId")
+            return Response(
+                content=json.dumps({"error": "Missing connectionId"}),
+                media_type="application/json",
+                status_code=400
+            )
+        
+
         
         # Find client_id for this connection
         client_id = None
@@ -109,7 +117,11 @@ async def handle_disconnect(request: Request):
         }
     except Exception as e:
         logger.error(f"Error handling disconnect: {str(e)}")
-        return Response(status_code=500, content=f"Error: {str(e)}")
+        return Response(
+            content=json.dumps({"error": str(e)}),
+            media_type="application/json",
+            status_code=500
+        )
 
 
 @router.post("/message")
@@ -264,18 +276,38 @@ async def send_to_client(connection_id: str, message: Dict[str, Any]):
 
         # Get API Gateway endpoint from environment or use hardcoded one
         # Remove the wss:// or https:// and /production from the endpoint
-        endpoint_url = os.environ.get("API_GATEWAY_WEBSOCKET_ENDPOINT", 
-                                    "https://5nu02h2v13.execute-api.eu-west-2.amazonaws.com/production")
+        #endpoint_url = os.environ.get("API_GATEWAY_WEBSOCKET_ENDPOINT", 
+        #                            "https://5nu02h2v13.execute-api.eu-west-2.amazonaws.com/production")
         
-        if endpoint_url.startswith(("wss://", "https://")):
-            endpoint_url = endpoint_url.split("://")[1]
+        #if endpoint_url.startswith(("wss://", "https://")):
+        #    endpoint_url = endpoint_url.split("://")[1]
         
-        if "/production" in endpoint_url:
-            endpoint_url = endpoint_url.split("/production")[0]
+        #if "/production" in endpoint_url:
+        #    endpoint_url = endpoint_url.split("/production")[0]
         
         # Ensure we have the correct format
-        endpoint_url = f"https://{endpoint_url}/production"
+        #endpoint_url = f"https://{endpoint_url}/production"
         
+        #endpoint_url = "https://5nu02h2v13.execute-api.eu-west-2.amazonaws.com/production"
+                
+        endpoint_url = os.environ.get("API_GATEWAY_WEBSOCKET_ENDPOINT", 
+                                    "https://5nu02h2v13.execute-api.eu-west-2.amazonaws.com/production")
+
+        # Standardize to https://
+        if endpoint_url.startswith("wss://"):
+            endpoint_url = "https://" + endpoint_url[6:]
+        elif not endpoint_url.startswith("https://"):
+            endpoint_url = "https://" + endpoint_url
+
+        # Ensure it ends with /production
+        if not endpoint_url.endswith("/production"):
+            if "/production" in endpoint_url:
+                # Extract the base URL without the stage
+                base_url = endpoint_url.split("/production")[0]
+                endpoint_url = f"{base_url}/production"
+            else:
+                endpoint_url = f"{endpoint_url}/production"
+
         logger.info(f"Using API Gateway Management API endpoint: {endpoint_url}")
         
         # Initialize API Gateway Management client

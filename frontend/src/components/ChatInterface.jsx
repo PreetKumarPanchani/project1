@@ -120,6 +120,20 @@ const ChatInterface = () => {
     // Process only the most recent message
     const latestMessage = wsMessages[wsMessages.length - 1];
     
+    // Handle error messages from Lambda
+    if (latestMessage.message && typeof latestMessage.message === 'string' && 
+      latestMessage.message.includes('error')) {
+    console.error('Server error:', latestMessage.message);
+    // Don't add error messages to chat, just log them
+    return;
+    }
+
+    // improve the WebSocket message handling to account for messages without a type field
+    if (!latestMessage.type) {
+      console.log('Received message without type:', latestMessage);
+      return;
+    }
+
     switch (latestMessage.type) {
       case 'transcription':
         addMessage('user', latestMessage.text);
@@ -168,6 +182,8 @@ const ChatInterface = () => {
     }
   }, [wsMessages, startPcmStream, endPcmStream, processPcmChunk]);
   
+
+
   // Auto scroll to bottom when messages change
   useEffect(() => {
     if (messagesEndRef.current) {

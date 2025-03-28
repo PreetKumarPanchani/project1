@@ -29,17 +29,36 @@ async def process_message(request: Request):
             # Import voice assistants here to avoid circular imports
             from src.main import voice_assistants
             
-            # Create voice assistant if needed
-            if client_id not in voice_assistants:
-                # This is where you'd initialize the voice assistant
-                # For now, return an error message
-                return {
-                    "response": {
-                        "type": "error",
-                        "text": "Voice assistant not initialized. Please reconnect."
-                    }
-                }
+
+        if client_id not in voice_assistants:
+            from src.websocket.connection import ConnectionManager
+            from src.voice.assistant import VoiceAssistant
             
+            # Create a dummy websocket for Lambda-initiated assistants
+            class DummyWebSocket:
+                def __init__(self):
+                    self.scope = {"path": f"/ws/{client_id}"}
+                    
+                async def send_json(self, data):
+                    # Messages will be sent via Lambda instead
+                    pass
+            
+            # Create new connection manager or reuse existing one
+            connection_manager = ConnectionManager()
+            
+            # Initialize voice assistant
+            voice_assistant = VoiceAssistant(
+                connection_manager=connection_manager,
+                websocket=DummyWebSocket()
+            )
+            
+            # Store and start the assistant
+            voice_assistants[client_id] = voice_assistant
+            await voice_assistant.start()
+            
+            logger.info(f"Created new voice assistant for client {client_id}")
+            
+                    
             # Process the query
             assistant = voice_assistants[client_id]
             await assistant.process_text_query(text)

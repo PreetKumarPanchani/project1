@@ -340,8 +340,10 @@ class VoiceAssistant:
                 input=text,
                 response_format="pcm"  # Use PCM format for lowest latency
             ) as response:
+                
+                
                 # Process audio in chunks as they arrive - use larger chunks for more stability
-                async for chunk in response.iter_bytes(chunk_size=8192):
+                async for chunk in response.iter_bytes(chunk_size=1024):
                     # Check for interruption after each chunk
                     if self.is_interrupted:
                         logger.info("Speech streaming interrupted")
@@ -356,7 +358,30 @@ class VoiceAssistant:
                         ##)
                         await self.send_message_to_client({"type": "audio_chunk", "data": chunk_base64, "format": "pcm"})
                         
-                
+                '''
+
+                # Use much smaller chunks (1KB instead of 8KB)
+                async for chunk in response.iter_bytes(chunk_size=1024):  # Significantly reduced
+                    if self.is_interrupted:
+                        logger.info("Speech streaming interrupted")
+                        break
+                    
+                    if chunk:
+                        # Send PCM chunk to the client with sequence numbers
+                        chunk_id = str(int(time.time() * 1000))  # Use timestamp as ID
+                        chunk_base64 = base64.b64encode(chunk).decode('utf-8')
+                        await self.send_message_to_client({
+                            "type": "audio_chunk", 
+                            "data": chunk_base64, 
+                            "format": "pcm",
+                            "chunk_id": chunk_id  # Add sequence identifier
+                        })
+                        
+                        # Add a small delay to prevent overwhelming Lambda
+                        await asyncio.sleep(0.03)
+            
+                '''
+
                 # No need for fallback with PCM as it's being played in real-time
                     
         except Exception as e:
@@ -456,23 +481,47 @@ class VoiceAssistant:
         ##    self.websocket
         ##)
         await self.send_message_to_client({"type": "status", "text": "Assistant stopped"})
-    
+        
 
-    async def send_message_to_client(self, message):
+    # Send message to client using Lambda
+    async def send_message_to_client(self, message, client_id=None):
         """Send message to client using Lambda"""
         try:
-            # Extract client ID from the WebSocket
-            client_id = None
-            
-            # Try to get from WebSocket scope path
-            if hasattr(self.websocket, "scope") and "path" in self.websocket.scope:
-                path = self.websocket.scope["path"]
-                if path.startswith("/ws/"):
-                    client_id = path.split("/ws/")[1]
-            
+            # Use provided client_id or try to extract it
             if not client_id:
-                logger.error("No client_id found for WebSocket")
+                # Try to get from WebSocket scope path
+                if hasattr(self.websocket, "scope") and "path" in self.websocket.scope:
+                    path = self.websocket.scope["path"]
+                    if path.startswith("/ws/"):
+                        client_id = path.split("/ws/")[1]
+                
+                
+                # If still no client_id, try to find it in the client_id_mapping
+                if not client_id:
+                    # Import dynamically to avoid circular imports
+                    import sys
+                    if 'src.gateway.api_gateway_handler' in sys.modules:
+                        gateway_module = sys.modules['src.gateway.api_gateway_handler']
+                        if hasattr(gateway_module, 'client_id_mapping'):
+                            # Look for the connection ID that matches this websocket
+                            for c_id, conn_id in gateway_module.client_id_mapping.items():
+                                # This is an approximation since we don't have a direct way to match
+                                client_id = c_id
+                                break
+                
+            if not client_id:
+                logger.error("No client_id found for WebSocket - message cannot be sent")
+                # Try to send via direct WebSocket as fallback
+                if hasattr(self.websocket, "send_json"):
+                    try:
+                        await self.websocket.send_json(message)
+                        logger.info("Sent message via direct WebSocket as fallback")
+                        return True
+                    except Exception as ws_err:
+                        logger.error(f"Fallback WebSocket send failed: {str(ws_err)}")
                 return False
+        
+
             
             # Initialize Lambda client
             lambda_client = boto3.client('lambda', region_name='eu-west-2')
